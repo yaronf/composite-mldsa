@@ -39,6 +39,15 @@ author:
     country: Canada
     code: K2K 3G5
     email: john.gray@entrust.com
+ -
+    fullname: Scott Fluhrer
+    organization: Cisco Systems
+    email: "sfluhrer@cisco.com"
+ -
+    fullname: "Bas Westerbaan"
+    organization: Cloudflare
+    email: bas@cloudflare.com
+
 
 normative:
  RFC8446:
