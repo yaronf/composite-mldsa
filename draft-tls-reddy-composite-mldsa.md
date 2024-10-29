@@ -81,10 +81,6 @@ ML-DSA {{FIPS204}} is a post-quantum signature schemes standardised by NIST. It 
 
 This memo specifies how a composite ML-DSA can be negotiated for authentication in TLS 1.3 via the "signature_algorithms" and "signature_algorithms_cert" extensions.
 
-# Conventions and Definitions
-
-{::boilerplate bcp14-tagged}
-
 ## Conventions and Terminology {#sec-terminology}
 
 {::boilerplate bcp14+}
