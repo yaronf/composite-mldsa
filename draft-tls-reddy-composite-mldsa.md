@@ -43,11 +43,6 @@ author:
     fullname: Scott Fluhrer
     organization: Cisco Systems
     email: "sfluhrer@cisco.com"
- -
-    fullname: "Bas Westerbaan"
-    organization: Cloudflare
-    email: bas@cloudflare.com
-
 
 normative:
  RFC8446:
@@ -68,7 +63,7 @@ informative:
  
 --- abstract
 
-This document specifies how the post-quantum signature scheme ML-DSA {{FIPS204}}, in combination with traditional algorithms RSA-PSS, ECDSA, and Ed25519, can be used for authentication in TLS 1.3. The composite ML-DSA approach is beneficial in deployments where operators seek additional protection against potential breaks or catastrophic bugs in ML-DSA.
+This document specifies how the post-quantum signature scheme ML-DSA {{FIPS204}}, in combination with traditional algorithms RSA-PKCS#1v1.5,RSA-PSS, ECDSA, Ed25519, and Ed448 can be used for authentication in TLS 1.3. The composite ML-DSA approach is beneficial in deployments where operators seek additional protection against potential breaks or catastrophic bugs in ML-DSA.
 
 --- middle
 
@@ -113,12 +108,11 @@ enum {
   mldsa87_ecdsa_secp384r1_sha384 (0x0909),
   mldsa44_ed25519 (0x090A),
   mldsa65_ed25519 (0x090B),
-  mldsa44_rsa_pss_rsae_sha256 (0x090C),
-  mldsa65_rsa_pss_rsae_sha384 (0x090D),
-  mldsa87_rsa_pss_rsae_sha512 (0x090E),
-  mldsa44_rsa_pss_pss_sha256 (0x090F),
-  mldsa65_rsa_pss_pss_sha384 (0x0910),
-  mldsa87_rsa_pss_pss_sha512 (0x0911)
+  mldsa44_rsa_pkcs1_sha256 (0x090C),
+  mldsa65_rsa_pkcs1_sha384 (0x090D),
+  mldsa44_rsa_pss_pss_sha256 (0x090E),
+  mldsa65_rsa_pss_pss_sha384 (0x090F),
+  mldsa87_ed448 (0x0910) 
 } SignatureScheme;
 ~~~
 
@@ -129,6 +123,20 @@ In TLS, the data used for generating a digital signature is unique for each TLS 
 The corresponding end-entity certificate when negotiated MUST
 use the First AlgorithmID and Second AlgorithmID respectively as
 defined in {{I-D.ietf-lamps-pq-composite-sigs}}.
+
+# Selection Criteria for Composite Signature Algorithms
+
+The composite signatures specified in the document are restricted set of cryptographic pairs, chosen from the intersection of two sources:
+
+* The composite algorithm combinations as recommended in {{I-D.ietf-lamps-pq-composite-sigs}}.
+* The mandatory-to-support or recommended signature algorithms listed in TLS 1.3.
+
+By limiting algorithm combinations to those defined in both {{I-D.ietf-lamps-pq-composite-sigs}} and TLS 1.3, this specification ensures that each pair: 
+
+* Meets established security standards for composite signatures in a post-quantum context, as described in {{I-D.ietf-lamps-pq-composite-sigs}}.
+* Is compatible with digital signatures recommended in TLS 1.3, ensuring interoperability and ease of adoption within the TLS ecosystem.
+
+This conservative approach reduces the risk of selecting unsafe or incompatible configurations, promoting security by requiring only trusted and well-vetted pairs. Future updates to this specification may introduce additional algorithm pairs as standards evolve, subject to similar vetting and inclusion criteria.
 
 # Security Considerations
 
@@ -148,16 +156,15 @@ according to the procedures in {{Section 6 of TLSIANA}}.
 | 0x0909  | mldsa87_ecdsa_secp384r1_sha384      | Y           | This document. |
 | 0x090A  | mldsa44_ed25519                     | Y           | This document. |
 | 0x090B  | mldsa65_ed25519                     | Y           | This document. |
-| 0x090C  | mldsa44_rsa_pss_rsae_sha256         | Y           | This document. |
-| 0x090D  | mldsa65_rsa_pss_rsae_sha384         | Y           | This document. |
-| 0x090E  | mldsa87_rsa_pss_rsae_sha512         | Y           | This document. |
-| 0x090F  | mldsa44_rsa_pss_pss_sha256          | Y           | This document. |
-| 0x0910  | mldsa65_rsa_pss_pss_sha384          | Y           | This document. |
-| 0x0911  | mldsa87_rsa_pss_pss_sha512          | Y           | This document. |
+| 0x090C  | mldsa44_rsa_pkcs1_sha256            | Y           | This document. |
+| 0x090D  | mldsa65_rsa_pkcs1_sha384            | Y           | This document. |
+| 0x090E  | mldsa44_rsa_pss_pss_sha256          | Y           | This document. |
+| 0x090F  | mldsa65_rsa_pss_pss_sha384          | Y           | This document. |
+| 0x0910  | mldsa87_ed448                       | Y           | This document. |
 
 --- back
 
 # Acknowledgments
 {:numbered="false"}
 
-TODO
+Thanks to Bas Westerbaan for the discussion and comments.
