@@ -49,6 +49,7 @@ normative:
  TLSIANA: I-D.ietf-tls-rfc8447bis
  I-D.ietf-lamps-pq-composite-sigs:
 informative:
+ RFC5246:
  I-D.ietf-pquip-pqt-hybrid-terminology:
  FIPS204:
    title: "FIPS-204: Module-Lattice-Based Digital Signature Standard"
@@ -73,13 +74,13 @@ The advent of quantum computing poses a significant threat to current cryptograp
 
 Unlike previous migrations between cryptographic algorithms, the decision of when to migrate and which algorithms to adopt is far from straightforward. Even after the migration period, it may be advantageous for an entity's cryptographic identity to incorporate multiple public-key algorithms to enhance security.
 
-Cautious implementers may opt to combine cryptographic algorithms in such a way that an attacker would need to break all of them simultaneously to compromise the protected data. These mechanisms are referred to as Post-Quantum/Traditional (PQ/T) Hybrids {{I-D.ietf-pquip-pqt-hybrid-terminology}}.
+Cautious implementers may opt to combine cryptographic algorithms in such a way that an attacker would need to break all of them simultaneously to compromise the protected data. These mechanisms are referred to as Post-Quantum/Traditional (PQ/T) Hybrids {{I-D.ietf-pquip-pqt-hybrid-terminology}}. 
 
 Certain jurisdictions are already recommending or mandating that PQC lattice schemes be used exclusively within a PQ/T hybrid framework. The use of Composite scheme provides a straightforward implementation of hybrid solutions compatible with (and advocated by) some governments and cybersecurity agencies {{BSI2021}}.
 
 ML-DSA {{FIPS204}} is a post-quantum signature schemes standardised by NIST. It is a module-lattice based scheme.
 
-This memo specifies how a composite ML-DSA can be negotiated for authentication in TLS 1.3 via the "signature_algorithms" and "signature_algorithms_cert" extensions.
+This memo specifies how a composite ML-DSA can be negotiated for authentication in TLS 1.3 via the "signature_algorithms" and "signature_algorithms_cert" extensions. The use of composite ML-DSA is valuable in deployments where disabling algorithms is complex or slow. Hybrid signatures provide additional safety by ensuring protection even if vulnerabilities are discovered in one of the constituent algorithms.
 
 ## Conventions and Terminology {#sec-terminology}
 
@@ -116,9 +117,13 @@ Each entry specifies a unique combination of an ML-DSA parameter, an elliptic cu
 
 In TLS, the data used for generating a digital signature is unique for each TLS session, as it includes the entire handshake. Thus, ML-DSA can utilize the deterministic version. The context parameter defined in {{FIPS204}} Algorithm 2/Algorithm 3 MUST be an empty string.
 
+The signature MUST be computed and verified as specified in {{Section 4.4.3 of RFC8446}}.
+
 The corresponding end-entity certificate when negotiated MUST
 use the First AlgorithmID and Second AlgorithmID respectively as
 defined in {{I-D.ietf-lamps-pq-composite-sigs}}.
+
+The schemes defined in this document MUST NOT be used in TLS 1.2 {{RFC5246}}. A peer that receives ServerKeyExchange or CertificateVerify message in a TLS 1.2 connection with schemes defined in this document MUST abort the connection with an illegal_parameter alert.
 
 # Selection Criteria for Composite Signature Algorithms
 
