@@ -128,13 +128,13 @@ defined in {{I-D.ietf-lamps-pq-composite-sigs}}.
 
 The composite signatures specified in the document are restricted set of cryptographic pairs, chosen from the intersection of two sources:
 
-* The composite algorithm combinations as recommended in {{I-D.ietf-lamps-pq-composite-sigs}}.
-* The mandatory-to-support or recommended signature algorithms listed in TLS 1.3.
+* The composite algorithm combinations as recommended in {{I-D.ietf-lamps-pq-composite-sigs}}, which specify both PQC and traditional signature algorithms.
+* The mandatory-to-support or recommended traditional signature algorithms listed in TLS 1.3.
 
 By limiting algorithm combinations to those defined in both {{I-D.ietf-lamps-pq-composite-sigs}} and TLS 1.3, this specification ensures that each pair: 
 
 * Meets established security standards for composite signatures in a post-quantum context, as described in {{I-D.ietf-lamps-pq-composite-sigs}}.
-* Is compatible with digital signatures recommended in TLS 1.3, ensuring interoperability and ease of adoption within the TLS ecosystem.
+* Is compatible with traditional digital signatures recommended in TLS 1.3, ensuring interoperability and ease of adoption within the TLS ecosystem.
 
 This conservative approach reduces the risk of selecting unsafe or incompatible configurations, promoting security by requiring only trusted and well-vetted pairs. Future updates to this specification may introduce additional algorithm pairs as standards evolve, subject to similar vetting and inclusion criteria.
 
