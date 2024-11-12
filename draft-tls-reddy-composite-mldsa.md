@@ -50,6 +50,7 @@ normative:
  I-D.ietf-lamps-pq-composite-sigs:
 informative:
  RFC5246:
+ RFC8017:
  I-D.ietf-pquip-pqt-hybrid-terminology:
  FIPS204:
    title: "FIPS-204: Module-Lattice-Based Digital Signature Standard"
@@ -93,6 +94,7 @@ This document is consistent with the terminology defined in {{I-D.ietf-pquip-pqt
 >      type in a multi-algorithm scheme.
 
 # ML-DSA SignatureSchemes Types
+
 As defined in {{RFC8446}}, the SignatureScheme namespace is used for
 the negotiation of signature scheme for authentication via the
 "signature_algorithms" and "signature_algorithms_cert" extensions.
@@ -113,11 +115,13 @@ enum {
 } SignatureScheme;
 ~~~
 
-Each entry specifies a unique combination of an ML-DSA parameter, an elliptic curve or RSA variant, and a hashing function. The first algorithm corresponds to ML-DSA-44, ML-DSA-65, and ML-DSA-87, as defined in {{FIPS204}}. It is important to note that the mldsa* entries represent the pure versions of these algorithms and should not be confused with prehashed variants, such as HashML-DSA-44, also defined in {{FIPS204}}.
+Each entry specifies a unique combination of an ML-DSA parameter, an elliptic curve or RSA variant, and a hashing function. The first algorithm corresponds to ML-DSA-44, ML-DSA-65, and ML-DSA-87, as defined in {{FIPS204}}. It is important to note that the mldsa* entries represent the pure versions of these algorithms and should not be confused with prehashed variants, such as HashML-DSA-44, also defined in {{FIPS204}}. Support for prehashed variants is not required because TLS computes the hash of the message (e.g., the transcript of the TLS handshake) that needs to be signed. 
+
+Note that TLS 1.3 removed support for RSASSA-PKCS1-v1_5 {{RFC8017}} in CertificateVerify messages, opting for RSASSA-PSS instead. Similarly, this document restricts the use of the composite signature algorithms mldsa44_rsa_pkcs1_sha256 and mldsa65_rsa_pkcs1_sha384 to the "signature_algorithms_cert" extension and does not define them for use in the "signature_algorithms" extension.
 
 In TLS, the data used for generating a digital signature is unique for each TLS session, as it includes the entire handshake. Thus, ML-DSA can utilize the deterministic version. The context parameter defined in {{FIPS204}} Algorithm 2/Algorithm 3 MUST be an empty string.
 
-The signature MUST be computed and verified as specified in {{Section 4.4.3 of RFC8446}}.
+The signature MUST be computed and verified as specified in {{Section 4.4.3 of RFC8446}}. The Composite-ML-DSA.Sign function, defined in {{I-D.ietf-lamps-pq-composite-sigs}}, will be utilized by the sender to compute the signature field of the CertificateVerify message. Conversely, the Composite-ML-DSA.Verify function, also defined in {{I-D.ietf-lamps-pq-composite-sigs}}, will be employed by the receiver to verify the signature field of the CertificateVerify message. In the LAMPS WG, it is being discussed that the composite signature API should avoid using protocol-specific encoding.
 
 The corresponding end-entity certificate when negotiated MUST
 use the First AlgorithmID and Second AlgorithmID respectively as
@@ -152,20 +156,20 @@ according to the procedures in {{Section 6 of TLSIANA}}.
 
 | Value   | Description                         | Recommended | Reference      |
 |---------|-------------------------------------|-------------|----------------|
-| 0x0907  | mldsa44_ecdsa_secp256r1_sha256      | Y           | This document. |
-| 0x0908  | mldsa65_ecdsa_secp384r1_sha384      | Y           | This document. |
-| 0x0909  | mldsa87_ecdsa_secp384r1_sha384      | Y           | This document. |
-| 0x090A  | mldsa44_ed25519                     | Y           | This document. |
-| 0x090B  | mldsa65_ed25519                     | Y           | This document. |
-| 0x090C  | mldsa44_rsa_pkcs1_sha256            | Y           | This document. |
-| 0x090D  | mldsa65_rsa_pkcs1_sha384            | Y           | This document. |
-| 0x090E  | mldsa44_rsa_pss_pss_sha256          | Y           | This document. |
-| 0x090F  | mldsa65_rsa_pss_pss_sha384          | Y           | This document. |
-| 0x0910  | mldsa87_ed448                       | Y           | This document. |
+| 0x0907  | mldsa44_ecdsa_secp256r1_sha256      | N           | This document. |
+| 0x0908  | mldsa65_ecdsa_secp384r1_sha384      | N           | This document. |
+| 0x0909  | mldsa87_ecdsa_secp384r1_sha384      | N           | This document. |
+| 0x090A  | mldsa44_ed25519                     | N           | This document. |
+| 0x090B  | mldsa65_ed25519                     | N           | This document. |
+| 0x090C  | mldsa44_rsa_pkcs1_sha256            | N           | This document. |
+| 0x090D  | mldsa65_rsa_pkcs1_sha384            | N           | This document. |
+| 0x090E  | mldsa44_rsa_pss_pss_sha256          | N           | This document. |
+| 0x090F  | mldsa65_rsa_pss_pss_sha384          | N           | This document. |
+| 0x0910  | mldsa87_ed448                       | N           | This document. |
 
 --- back
 
 # Acknowledgments
 {:numbered="false"}
 
-Thanks to Bas Westerbaan for the discussion and comments.
+Thanks to Bas Westerbaan, Alicja Kario, Ilari Liusvaara and Sean Turner for the discussion and comments.
