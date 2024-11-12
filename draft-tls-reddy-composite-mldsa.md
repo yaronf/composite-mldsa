@@ -121,7 +121,9 @@ Note that TLS 1.3 removed support for RSASSA-PKCS1-v1_5 {{RFC8017}} in Certifica
 
 In TLS, the data used for generating a digital signature is unique for each TLS session, as it includes the entire handshake. Thus, ML-DSA can utilize the deterministic version. The context parameter defined in {{FIPS204}} Algorithm 2/Algorithm 3 MUST be an empty string.
 
-The signature MUST be computed and verified as specified in {{Section 4.4.3 of RFC8446}}. The Composite-ML-DSA.Sign function, defined in {{I-D.ietf-lamps-pq-composite-sigs}}, will be utilized by the sender to compute the signature field of the CertificateVerify message. Conversely, the Composite-ML-DSA.Verify function, also defined in {{I-D.ietf-lamps-pq-composite-sigs}}, will be employed by the receiver to verify the signature field of the CertificateVerify message. In the LAMPS WG, it is being discussed that the composite signature API should avoid using protocol-specific encoding.
+The signature MUST be computed and verified as specified in {{Section 4.4.3 of RFC8446}}. The Composite-ML-DSA.Sign function, defined in {{I-D.ietf-lamps-pq-composite-sigs}}, will be utilized by the sender to compute the signature field of the CertificateVerify message. Conversely, the Composite-ML-DSA.Verify function, also defined in {{I-D.ietf-lamps-pq-composite-sigs}}, will be employed by the receiver to verify the signature field of the CertificateVerify message. 
+
+Note: In the LAMPS WG, it is being discussed that the composite signature API should avoid using protocol-specific encoding.
 
 The corresponding end-entity certificate when negotiated MUST
 use the First AlgorithmID and Second AlgorithmID respectively as
