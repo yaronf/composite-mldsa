@@ -156,18 +156,32 @@ to be taken into account.
 This document requests new entries to the TLS SignatureScheme registry,
 according to the procedures in {{Section 6 of TLSIANA}}.
 
+
 | Value   | Description                         | Recommended | Reference      |
 |---------|-------------------------------------|-------------|----------------|
 | 0x0907  | mldsa44_ecdsa_secp256r1_sha256      | N           | This document. |
-| 0x0908  | mldsa65_ecdsa_secp384r1_sha384      | N           | This document. |
-| 0x0909  | mldsa87_ecdsa_secp384r1_sha384      | N           | This document. |
+| 0x0908  | mldsa65_ecdsa_secp384r1_sha512      | N           | This document. |
+| 0x0909  | mldsa87_ecdsa_secp384r1_sha512      | N           | This document. |
 | 0x090A  | mldsa44_ed25519                     | N           | This document. |
 | 0x090B  | mldsa65_ed25519                     | N           | This document. |
-| 0x090C  | mldsa44_rsa_pkcs1_sha256            | N           | This document. |
-| 0x090D  | mldsa65_rsa_pkcs1_sha384            | N           | This document. |
-| 0x090E  | mldsa44_rsa_pss_pss_sha256          | N           | This document. |
-| 0x090F  | mldsa65_rsa_pss_pss_sha384          | N           | This document. |
+| 0x090C  | mldsa44_rsa3072_pkcs1_sha256        | N           | This document. |
+| 0x090D  | mldsa65_rsa4096_pkcs1_sha384        | N           | This document. |
+| 0x090E  | mldsa44_rsa3072_pss_pss_sha256      | N           | This document. |
+| 0x090F  | mldsa65_rsa4096_pss_pss_sha384      | N           | This document. |
 | 0x0910  | mldsa87_ed448                       | N           | This document. |
+
+## Restricting Composite Signature Algorithms to the signature_algorithms_cert Extension
+
+IANA is requested to update the "TLS SignatureScheme" registry in the following way:
+
+1. Add a new column titled "Extension Restriction" :
+   This column will indicate if a particular Sigsignature algorithm is restricted to specific TLS extension.
+
+2. Update the entries for mldsa44_rsa3072_pkcs1_sha256 and mldsa65_rsa4096_pkcs1_sha384:
+   In the new "Extension Restriction" column, indicate the following for these algorithms:
+   Restriction: "signature_algorithms_cert"
+   Note: These algorithms are defined for use exclusively with the signature_algorithms_cert extension and 
+   are not defined for use with the signature_algorithms extension.
 
 --- back
 
