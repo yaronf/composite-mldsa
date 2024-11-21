@@ -11,6 +11,7 @@ consensus: true
 v: 3
 area: "Security"
 workgroup: "TLS"
+
 keyword:
  - ML-DSA
  - FIPS204
@@ -81,7 +82,11 @@ Certain jurisdictions are already recommending or mandating that PQC lattice sch
 
 ML-DSA {{FIPS204}} is a post-quantum signature schemes standardised by NIST. It is a module-lattice based scheme.
 
-This memo specifies how a composite ML-DSA can be negotiated for authentication in TLS 1.3 via the "signature_algorithms" and "signature_algorithms_cert" extensions. The use of composite ML-DSA is valuable in deployments where disabling algorithms is complex or slow. Hybrid signatures provide additional safety by ensuring protection even if vulnerabilities are discovered in one of the constituent algorithms.
+This memo specifies how a composite ML-DSA can be negotiated for authentication in TLS 1.3 via the "signature_algorithms" and "signature_algorithms_cert" extensions. Hybrid signatures provide additional safety by ensuring protection even if vulnerabilities are discovered in one of the constituent algorithms. For deployments that cannot easily tweak configuration or effectively enable/disable algorithms, a composite signature combining PQC signature algorithm with an traditional signature algorithm offers the most viable solution.
+
+The rationale for this approach is based on the limitations of fallback strategies. For example, if a traditional signature system is compromised, reverting to a PQC signature algorithm would prevent attackers from forging new signatures that are no longer accepted. However, such a fallback process leaves systems exposed until the transition to the PQC signature algorithm is complete, which can be slow in many environments. In contrast, using hybrid signatures from the start mitigates this issue, offering robust protection and encouraging faster adoption of PQC.
+
+Further, zero-day vulnerabilities, where an exploit is discovered and used before the vulnerability is publicly disclosed, highlights this risk. The time required to disclose such attacks and for organizations to reactively switch to alternative algorithms can leave systems critically exposed. By the time a secure fallback is implemented, attackers may have already caused irreparable damage. Adopting hybrid signatures preemptively helps mitigate this window of vulnerability, ensuring resilience even in the face of unforeseen threats.
 
 ## Conventions and Terminology {#sec-terminology}
 
@@ -175,7 +180,7 @@ according to the procedures in {{Section 6 of TLSIANA}}.
 IANA is requested to update the "TLS SignatureScheme" registry in the following way:
 
 1. Add a new column titled "Extension Restriction" :
-   This column will indicate if a particular Sigsignature algorithm is restricted to specific TLS extension.
+   This column will indicate if a particular signature algorithm is restricted to specific TLS extensions.
 
 2. Update the entries for mldsa44_rsa3072_pkcs1_sha256 and mldsa65_rsa4096_pkcs1_sha384:
    In the new "Extension Restriction" column, indicate the following for these algorithms:
