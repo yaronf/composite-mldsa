@@ -184,7 +184,7 @@ IANA is requested to update the "TLS SignatureScheme" registry in the following 
 
 2. Update the entries for mldsa44_rsa3072_pkcs1_sha256 and mldsa65_rsa4096_pkcs1_sha384:
    In the new "Extension Restriction" column, indicate the following for these algorithms:
-   Restriction: "signature_algorithms_cert"
+   * Restriction: "signature_algorithms_cert"
    Note: These algorithms are defined for use exclusively with the signature_algorithms_cert extension and 
    are not defined for use with the signature_algorithms extension.
 
