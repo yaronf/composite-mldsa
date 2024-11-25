@@ -11,6 +11,7 @@ consensus: true
 v: 3
 area: "Security"
 workgroup: "TLS"
+
 keyword:
  - ML-DSA
  - FIPS204
@@ -81,7 +82,11 @@ Certain jurisdictions are already recommending or mandating that PQC lattice sch
 
 ML-DSA {{FIPS204}} is a post-quantum signature schemes standardised by NIST. It is a module-lattice based scheme.
 
-This memo specifies how a composite ML-DSA can be negotiated for authentication in TLS 1.3 via the "signature_algorithms" and "signature_algorithms_cert" extensions. The use of composite ML-DSA is valuable in deployments where disabling algorithms is complex or slow. Hybrid signatures provide additional safety by ensuring protection even if vulnerabilities are discovered in one of the constituent algorithms.
+This memo specifies how a composite ML-DSA can be negotiated for authentication in TLS 1.3 via the "signature_algorithms" and "signature_algorithms_cert" extensions. Hybrid signatures provide additional safety by ensuring protection even if vulnerabilities are discovered in one of the constituent algorithms. For deployments that cannot easily tweak configuration or effectively enable/disable algorithms, a composite signature combining PQC signature algorithm with an traditional signature algorithm offers the most viable solution.
+
+The rationale for this approach is based on the limitations of fallback strategies. For example, if a traditional signature system is compromised, reverting to a PQC signature algorithm would prevent attackers from forging new signatures that are no longer accepted. However, such a fallback process leaves systems exposed until the transition to the PQC signature algorithm is complete, which can be slow in many environments. In contrast, using hybrid signatures from the start mitigates this issue, offering robust protection and encouraging faster adoption of PQC.
+
+Further, zero-day vulnerabilities, where an exploit is discovered and used before the vulnerability is publicly disclosed, highlights this risk. The time required to disclose such attacks and for organizations to reactively switch to alternative algorithms can leave systems critically exposed. By the time a secure fallback is implemented, attackers may have already caused irreparable damage. Adopting hybrid signatures preemptively helps mitigate this window of vulnerability, ensuring resilience even in the face of unforeseen threats.
 
 ## Conventions and Terminology {#sec-terminology}
 
@@ -107,17 +112,17 @@ enum {
   mldsa87_ecdsa_secp384r1_sha384 (0x0909),
   mldsa44_ed25519 (0x090A),
   mldsa65_ed25519 (0x090B),
-  mldsa44_rsa_pkcs1_sha256 (0x090C),
-  mldsa65_rsa_pkcs1_sha384 (0x090D),
-  mldsa44_rsa_pss_pss_sha256 (0x090E),
-  mldsa65_rsa_pss_pss_sha384 (0x090F),
-  mldsa87_ed448 (0x0910) 
-} SignatureScheme;
+  mldsa44_rsa2048_pkcs1_sha256 (0x090C),
+  mldsa65_rsa3072_pkcs1_sha256 (0x090D),
+  mldsa65_rsa4096_pkcs1_sha384 (0x090E),
+  mldsa44_rsa2048_pss_pss_sha256 (0x090F),
+  mldsa65_rsa3072_pss_pss_sha256 (0x0910),
+  mldsa65_rsa4096_pss_pss_sha384 (0x0911),
+  mldsa87_ed448 (0x0912)
+} SignatureScheme
 ~~~
 
 Each entry specifies a unique combination of an ML-DSA parameter, an elliptic curve or RSA variant, and a hashing function. The first algorithm corresponds to ML-DSA-44, ML-DSA-65, and ML-DSA-87, as defined in {{FIPS204}}. It is important to note that the mldsa* entries represent the pure versions of these algorithms and should not be confused with prehashed variants, such as HashML-DSA-44, also defined in {{FIPS204}}. Support for prehashed variants is not required because TLS computes the hash of the message (e.g., the transcript of the TLS handshake) that needs to be signed. 
-
-Note that TLS 1.3 removed support for RSASSA-PKCS1-v1_5 {{RFC8017}} in CertificateVerify messages, opting for RSASSA-PSS instead. Similarly, this document restricts the use of the composite signature algorithms mldsa44_rsa_pkcs1_sha256 and mldsa65_rsa_pkcs1_sha384 to the "signature_algorithms_cert" extension and does not define them for use in the "signature_algorithms" extension.
 
 In TLS, the data used for generating a digital signature is unique for each TLS session, as it includes the entire handshake. Thus, ML-DSA can utilize the deterministic version. The context parameter defined in {{FIPS204}} Algorithm 2/Algorithm 3 MUST be an empty string.
 
@@ -130,6 +135,12 @@ use the First AlgorithmID and Second AlgorithmID respectively as
 defined in {{I-D.ietf-lamps-pq-composite-sigs}}.
 
 The schemes defined in this document MUST NOT be used in TLS 1.2 {{RFC5246}}. A peer that receives ServerKeyExchange or CertificateVerify message in a TLS 1.2 connection with schemes defined in this document MUST abort the connection with an illegal_parameter alert.
+
+# Signature Algorithm Restrictions
+
+TLS 1.3 removed support for RSASSA-PKCS1-v1_5 {{RFC8017}} in CertificateVerify messages, opting for RSASSA-PSS instead. Similarly, this document restricts the use of the composite signature algorithms mldsa44_rsa2048_pkcs1_sha256, mldsa65_rsa3072_pkcs1_sha256, and mldsa65_rsa4096_pkcs1_sha384 algorithms to the "signature_algorithms_cert" extension. These composite signature algorithms MUST NOT be used with the "signature_algorithms" extension. These values refer solely to signatures which appear in certificates (see {{Section 4.4.2.2 of RFC8446}}) and are not defined for use in signed TLS handshake messages.
+
+A peer that receives a CertificateVerify message indicating the use of the RSASSA-PKCS1-v1_5 algorithm as one of the component signature algorithms MUST terminate the connection with a fatal illegal_parameter alert.
 
 # Selection Criteria for Composite Signature Algorithms
 
@@ -156,6 +167,7 @@ to be taken into account.
 This document requests new entries to the TLS SignatureScheme registry,
 according to the procedures in {{Section 6 of TLSIANA}}.
 
+
 | Value   | Description                         | Recommended | Reference      |
 |---------|-------------------------------------|-------------|----------------|
 | 0x0907  | mldsa44_ecdsa_secp256r1_sha256      | N           | This document. |
@@ -163,11 +175,17 @@ according to the procedures in {{Section 6 of TLSIANA}}.
 | 0x0909  | mldsa87_ecdsa_secp384r1_sha384      | N           | This document. |
 | 0x090A  | mldsa44_ed25519                     | N           | This document. |
 | 0x090B  | mldsa65_ed25519                     | N           | This document. |
-| 0x090C  | mldsa44_rsa_pkcs1_sha256            | N           | This document. |
-| 0x090D  | mldsa65_rsa_pkcs1_sha384            | N           | This document. |
-| 0x090E  | mldsa44_rsa_pss_pss_sha256          | N           | This document. |
-| 0x090F  | mldsa65_rsa_pss_pss_sha384          | N           | This document. |
-| 0x0910  | mldsa87_ed448                       | N           | This document. |
+| 0x090C  | mldsa44_rsa2048_pkcs1_sha256        | N           | This document. |
+| 0x090D  | mldsa65_rsa3072_pkcs1_sha256        | N           | This document. |
+| 0x090E  | mldsa65_rsa4096_pkcs1_sha384        | N           | This document. |
+| 0x090F  | mldsa44_rsa2048_pss_pss_sha256      | N           | This document. |
+| 0x0910  | mldsa65_rsa3072_pss_pss_sha256      | N           | This document. |
+| 0x0911  | mldsa65_rsa4096_pss_pss_sha384      | N           | This document. |
+| 0x0912  | mldsa87_ed448                       | N           | This document. |
+
+## Restricting Composite Signature Algorithms to the signature_algorithms_cert Extension
+
+IANA is requested to add a footnote indicating that the mldsa44_rsa2048_pkcs1_sha256, mldsa65_rsa3072_pkcs1_sha256, and mldsa65_rsa4096_pkcs1_sha384 algorithms are defined exclusively for use with the signature_algorithms_cert extension and are not intended for use with the signature_algorithms extension.
 
 --- back
 
