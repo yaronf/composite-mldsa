@@ -112,17 +112,17 @@ enum {
   mldsa87_ecdsa_secp384r1_sha384 (0x0909),
   mldsa44_ed25519 (0x090A),
   mldsa65_ed25519 (0x090B),
-  mldsa44_rsa_pkcs1_sha256 (0x090C),
-  mldsa65_rsa_pkcs1_sha384 (0x090D),
-  mldsa44_rsa_pss_pss_sha256 (0x090E),
-  mldsa65_rsa_pss_pss_sha384 (0x090F),
-  mldsa87_ed448 (0x0910) 
-} SignatureScheme;
+  mldsa44_rsa2048_pkcs1_sha256 (0x090C),
+  mldsa65_rsa3072_pkcs1_sha256 (0x090D),
+  mldsa65_rsa4096_pkcs1_sha384 (0x090E),
+  mldsa44_rsa2048_pss_pss_sha256 (0x090F),
+  mldsa65_rsa3072_pss_pss_sha256 (0x0910),
+  mldsa65_rsa4096_pss_pss_sha384 (0x0911),
+  mldsa87_ed448 (0x0912)
+} SignatureScheme
 ~~~
 
 Each entry specifies a unique combination of an ML-DSA parameter, an elliptic curve or RSA variant, and a hashing function. The first algorithm corresponds to ML-DSA-44, ML-DSA-65, and ML-DSA-87, as defined in {{FIPS204}}. It is important to note that the mldsa* entries represent the pure versions of these algorithms and should not be confused with prehashed variants, such as HashML-DSA-44, also defined in {{FIPS204}}. Support for prehashed variants is not required because TLS computes the hash of the message (e.g., the transcript of the TLS handshake) that needs to be signed. 
-
-Note that TLS 1.3 removed support for RSASSA-PKCS1-v1_5 {{RFC8017}} in CertificateVerify messages, opting for RSASSA-PSS instead. Similarly, this document restricts the use of the composite signature algorithms mldsa44_rsa_pkcs1_sha256 and mldsa65_rsa_pkcs1_sha384 to the "signature_algorithms_cert" extension and does not define them for use in the "signature_algorithms" extension.
 
 In TLS, the data used for generating a digital signature is unique for each TLS session, as it includes the entire handshake. Thus, ML-DSA can utilize the deterministic version. The context parameter defined in {{FIPS204}} Algorithm 2/Algorithm 3 MUST be an empty string.
 
@@ -135,6 +135,13 @@ use the First AlgorithmID and Second AlgorithmID respectively as
 defined in {{I-D.ietf-lamps-pq-composite-sigs}}.
 
 The schemes defined in this document MUST NOT be used in TLS 1.2 {{RFC5246}}. A peer that receives ServerKeyExchange or CertificateVerify message in a TLS 1.2 connection with schemes defined in this document MUST abort the connection with an illegal_parameter alert.
+
+# Signature Algorithm Restrictions
+
+TLS 1.3 removed support for RSASSA-PKCS1-v1_5 {{RFC8017}} in CertificateVerify messages, opting for RSASSA-PSS instead. Similarly, this document restricts the use of the composite signature algorithms mldsa44_rsa_pkcs1_sha256 and mldsa65_rsa_pkcs1_sha384 to the "signature_algorithms_cert" extension. These composite signature algorithms must not be used with the "signature_algorithms" extension.
+These values refer solely to signatures which appear in certificates (see {{Section 4.4.2.2 of RFC8446})} and are not defined for use in signed TLS handshake messages.
+
+To enforce these rules, a violation of the expected usage of these signature algorithms will result in the transmission of a "illegal_parameter" alert.
 
 # Selection Criteria for Composite Signature Algorithms
 
@@ -165,28 +172,21 @@ according to the procedures in {{Section 6 of TLSIANA}}.
 | Value   | Description                         | Recommended | Reference      |
 |---------|-------------------------------------|-------------|----------------|
 | 0x0907  | mldsa44_ecdsa_secp256r1_sha256      | N           | This document. |
-| 0x0908  | mldsa65_ecdsa_secp384r1_sha512      | N           | This document. |
-| 0x0909  | mldsa87_ecdsa_secp384r1_sha512      | N           | This document. |
+| 0x0908  | mldsa65_ecdsa_secp384r1_sha384      | N           | This document. |
+| 0x0909  | mldsa87_ecdsa_secp384r1_sha384      | N           | This document. |
 | 0x090A  | mldsa44_ed25519                     | N           | This document. |
 | 0x090B  | mldsa65_ed25519                     | N           | This document. |
-| 0x090C  | mldsa44_rsa3072_pkcs1_sha256        | N           | This document. |
-| 0x090D  | mldsa65_rsa4096_pkcs1_sha384        | N           | This document. |
-| 0x090E  | mldsa44_rsa3072_pss_pss_sha256      | N           | This document. |
-| 0x090F  | mldsa65_rsa4096_pss_pss_sha384      | N           | This document. |
-| 0x0910  | mldsa87_ed448                       | N           | This document. |
+| 0x090C  | mldsa44_rsa2048_pkcs1_sha256        | N           | This document. |
+| 0x090D  | mldsa65_rsa3072_pkcs1_sha256        | N           | This document. |
+| 0x090E  | mldsa65_rsa4096_pkcs1_sha384        | N           | This document. |
+| 0x090F  | mldsa44_rsa2048_pss_pss_sha256      | N           | This document. |
+| 0x0910  | mldsa65_rsa3072_pss_pss_sha256      | N           | This document. |
+| 0x0911  | mldsa65_rsa4096_pss_pss_sha384      | N           | This document. |
+| 0x0912  | mldsa87_ed448                       | N           | This document. |
 
 ## Restricting Composite Signature Algorithms to the signature_algorithms_cert Extension
 
-IANA is requested to update the "TLS SignatureScheme" registry in the following way:
-
-1. Add a new column titled "Extension Restriction" :
-   This column will indicate if a particular signature algorithm is restricted to specific TLS extensions.
-
-2. Update the entries for mldsa44_rsa3072_pkcs1_sha256 and mldsa65_rsa4096_pkcs1_sha384:
-   In the new "Extension Restriction" column, indicate the following for these algorithms:
-   * Restriction: "signature_algorithms_cert"
-   Note: These algorithms are defined for use exclusively with the signature_algorithms_cert extension and 
-   are not defined for use with the signature_algorithms extension.
+IANA is requested to add a footnote indicating that the mldsa44_rsa2048_pkcs1_sha256, mldsa65_rsa3072_pkcs1_sha256, and mldsa65_rsa4096_pkcs1_sha384 algorithms are defined exclusively for use with the signature_algorithms_cert extension and are not intended for use with the signature_algorithms extension.
 
 --- back
 
