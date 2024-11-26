@@ -3,7 +3,7 @@ title: "Use of Composite ML-DSA in TLS 1.3"
 abbrev: "Use of Composite ML-DSA in TLS 1.3"
 category: std
 
-docname: draft-tls-reddy-composite-mldsa-latest
+docname: draft-reddy-tls-composite-mldsa-latest
 submissiontype: IETF
 number:
 date:
