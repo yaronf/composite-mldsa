@@ -128,8 +128,6 @@ In TLS, the data used for generating a digital signature is unique for each TLS 
 
 The signature MUST be computed and verified as specified in {{Section 4.4.3 of RFC8446}}. The Composite-ML-DSA.Sign function, defined in {{I-D.ietf-lamps-pq-composite-sigs}}, will be utilized by the sender to compute the signature field of the CertificateVerify message. Conversely, the Composite-ML-DSA.Verify function, also defined in {{I-D.ietf-lamps-pq-composite-sigs}}, will be employed by the receiver to verify the signature field of the CertificateVerify message. 
 
-Note: In the LAMPS WG, it is being discussed that the composite signature API should avoid using protocol-specific encoding.
-
 The corresponding end-entity certificate when negotiated MUST
 use the First AlgorithmID and Second AlgorithmID respectively as
 defined in {{I-D.ietf-lamps-pq-composite-sigs}}.
@@ -161,6 +159,9 @@ This conservative approach reduces the risk of selecting unsafe or incompatible 
 The security considerations discussed in Section 11 of {{I-D.ietf-lamps-pq-composite-sigs}} needs
 to be taken into account. 
 
+Ed25519 and Ed448 ensure SUF security, which may remain secure even if ML-DSA is broken, at least until CRQCs
+emerge. Applications that prioritize SUF security may benefit from using them in composite with ML-DSA to
+mitigate risks if ML-DSA is eventually broken.
 
 # IANA Considerations
 
