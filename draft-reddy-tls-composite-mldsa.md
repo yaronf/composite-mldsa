@@ -124,11 +124,9 @@ enum {
 
 Each entry specifies a unique combination of an ML-DSA parameter, an elliptic curve or RSA variant, and a hashing function. The first algorithm corresponds to ML-DSA-44, ML-DSA-65, and ML-DSA-87, as defined in {{FIPS204}}. It is important to note that the mldsa* entries represent the pure versions of these algorithms and should not be confused with prehashed variants, such as HashML-DSA-44, also defined in {{FIPS204}}. Support for prehashed variants is not required because TLS computes the hash of the message (e.g., the transcript of the TLS handshake) that needs to be signed. 
 
-In TLS, the data used for generating a digital signature is unique for each TLS session, as it includes the entire handshake. Thus, ML-DSA can utilize the deterministic version. The context parameter defined in {{FIPS204}} Algorithm 2/Algorithm 3 MUST be an empty string.
+ML-DSA supports two signing modes: deterministic and hedged. In the deterministic mode, the signature is derived solely from the message and the private key, without requiring fresh randomness at signing time. While this eliminates dependence on an external random number generator (RNG), it may increase susceptibility to side-channel attacks, such as fault injection. The hedged mode mitigates this risk by incorporating both fresh randomness generated at signing time and precomputed randomness embedded in the private key, thereby offering stronger protection against such attacks. In the context of TLS, authentication signatures are computed over unique handshake transcripts, making each signature input distinct for every session. This property allows the use of either signing mode. Therefore, the hedged signing mode can be leveraged to provide protection against the side-channel attack. The choice between deterministic and hedged modes does not affect interoperability, as the verification process is the same for both. In both modes, the context parameter defined in Algorithm 2 and Algorithm 3 of [FIPS204] MUST be set to the empty string.
 
 The signature MUST be computed and verified as specified in {{Section 4.4.3 of RFC8446}}. The Composite-ML-DSA.Sign function, defined in {{I-D.ietf-lamps-pq-composite-sigs}}, will be utilized by the sender to compute the signature field of the CertificateVerify message. Conversely, the Composite-ML-DSA.Verify function, also defined in {{I-D.ietf-lamps-pq-composite-sigs}}, will be employed by the receiver to verify the signature field of the CertificateVerify message. 
-
-Note: In the LAMPS WG, it is being discussed that the composite signature API should avoid using protocol-specific encoding.
 
 The corresponding end-entity certificate when negotiated MUST
 use the First AlgorithmID and Second AlgorithmID respectively as
@@ -161,6 +159,9 @@ This conservative approach reduces the risk of selecting unsafe or incompatible 
 The security considerations discussed in Section 11 of {{I-D.ietf-lamps-pq-composite-sigs}} needs
 to be taken into account. 
 
+Ed25519 and Ed448 ensure SUF security, which may remain secure even if ML-DSA is broken, at least until CRQCs
+emerge. Applications that prioritize SUF security may benefit from using them in composite with ML-DSA to
+mitigate risks if ML-DSA is eventually broken.
 
 # IANA Considerations
 
