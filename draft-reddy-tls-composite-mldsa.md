@@ -163,7 +163,7 @@ Ed25519 and Ed448 ensure SUF security, which may remain secure even if ML-DSA is
 emerge. Applications that prioritize SUF security may benefit from using them in composite with ML-DSA to
 mitigate risks if ML-DSA is eventually broken.
 
-TLS clients that support both composite signatures and traditional-only signatures are vulnerable to downgrade attacks. In such a scenario, an attacker with access to a CRQC could forge a traditional server certificate, thereby impersonating the server. If the client does not enforce the use of composite or PQ authentication, it may accept an insecure, traditional-only certificate. To prevent such attacks, clients MUST enforce policy that rejects traditional-only certificates when composite or PQ authentication is supported.
+TLS clients that support both post-quantum and traditional-only signature algorithms are vulnerable to downgrade attacks. In such a scenario, an attacker with access to a CRQC could forge a traditional server certificate, thereby impersonating the server. If the client accepts traditional-only certificates, it will be exposed to this risk. To mitigate such attacks, clients SHOULD enforce a policy to reject traditional-only certificates once post-quantum or composite authentication is broadly deployed and the need to interoperate with legacy servers has passed. In the interim, accepting traditional-only certificates remains necessary for compatibility with the existing ecosystem, where many servers have not yet upgraded to PQ or composite authentication mechanisms. 
 
 # IANA Considerations
 
